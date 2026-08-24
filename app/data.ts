@@ -2,7 +2,7 @@ export type Bid = {
   id: string; category: "공사" | "용역" | "물품"; title: string; number: string;
   agency: string; demand: string; region: string; basePrice: number; estimatePrice: number;
   announced: string; deadline: string; opening: string; status: "신규" | "진행중" | "마감임박";
-  method: string; contract: string; license: string; qualification: string;
+  method: string; contract: string; license: string; qualification: string; originalUrl?: string;
 };
 
 export const bids: Bid[] = [

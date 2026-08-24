@@ -9,8 +9,9 @@ const money=(input:string)=>input&&Number.isFinite(Number(input))?Number(input):
 export function normalizeBid(item:G2BItem,category:string):NormalizedBid{return{source:"G2B",bidNumber:value(item,"bidNtceNo","bidNumber"),bidOrder:value(item,"bidNtceOrd","bidOrder")||"000",title:value(item,"bidNtceNm","title"),category,agency:value(item,"ntceInsttNm","orderingAgency"),region:value(item,"prtcptPsblRgnNm","region")||null,basePrice:money(value(item,"bssamt","basePrice")),announcedAt:value(item,"bidNtceDt","announcementAt")||null,deadlineAt:value(item,"bidClseDt","deadlineAt")||null,originalUrl:value(item,"bidNtceDtlUrl","originalUrl")||null,raw:item}};
 
 export async function fetchG2B(path:string,params:Record<string,string>,attempt=0):Promise<G2BItem[]>{
-  const key=process.env.DATA_GO_KR_SERVICE_KEY;const base=process.env.G2B_API_BASE_URL;
-  if(!key||!base)throw new Error("G2B API 환경변수가 설정되지 않았습니다.");
+  const rawKey=process.env.DATA_GO_KR_SERVICE_KEY;const base=process.env.G2B_API_BASE_URL;
+  if(!rawKey||!base)throw new Error("G2B API 환경변수가 설정되지 않았습니다.");
+  let key=rawKey;try{key=decodeURIComponent(rawKey)}catch{/* 이미 Decoding 키이면 그대로 사용 */}
   const url=new URL(path,base);url.search=new URLSearchParams({...params,serviceKey:key,type:"json"}).toString();
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),DEFAULT_TIMEOUT);
   try{const response=await fetch(url,{signal:controller.signal,headers:{accept:"application/json"}});if(!response.ok)throw new Error(`G2B API ${response.status}`);const json=await response.json() as {response?:{body?:{items?:G2BItem[]|{item?:G2BItem[]}}}};const items=json.response?.body?.items;return Array.isArray(items)?items:items?.item??[]}
