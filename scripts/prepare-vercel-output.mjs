@@ -39,7 +39,17 @@ await writeFile(
 await writeFile(
   resolve(functionDir, "adapter.mjs"),
   `import { Readable } from "node:stream";
-import worker from "./server/index.js";
+
+// Node's Fetch implementation rejects Unicode response-header values. Vinext
+// can propagate a route label or deployment path into an internal header, so
+// encode only the non-Latin header values before the app runtime is imported.
+const nativeHeaderSet = Headers.prototype.set;
+Headers.prototype.set = function setAsciiHeader(name, value) {
+  const text = String(value);
+  return nativeHeaderSet.call(this, name, /[^\\u0000-\\u00ff]/.test(text) ? encodeURI(text) : text);
+};
+
+const { default: worker } = await import("./server/index.js");
 
 function requestUrl(req) {
   const proto = String(req.headers["x-forwarded-proto"] || "https").split(",")[0];
