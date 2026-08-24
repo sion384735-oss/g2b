@@ -17,7 +17,7 @@ const bids = [
 export default function Home() {
   return (
     <main>
-      <SiteHeader active="bids"/>
+      <SiteHeader/>
 
       <section className="hero">
         <div className="eyebrow"><span>●</span> 나라장터 공고 실시간 업데이트</div>
