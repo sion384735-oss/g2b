@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import type { Bid } from "../data";
 import { won } from "../data";
 
+const hasRegionRestriction=(region:string)=>!["","전국","제한없음","지역제한없음","해당없음","-"].includes(region.trim());
+
 export default function BidExplorer({items}:{items:Bid[]}) {
   const pageSize=20;
   const [query,setQuery]=useState(""); const [category,setCategory]=useState("전체"); const [region,setRegion]=useState("전체"); const [status,setStatus]=useState("전체"); const [saved,setSaved]=useState<string[]>([]); const [page,setPage]=useState(1);
@@ -28,7 +30,7 @@ export default function BidExplorer({items}:{items:Bid[]}) {
     <section className="panel data-table" aria-live="polite">
       <div className="data-head"><span>구분</span><span>공고명 / 공고번호</span><span>발주기관</span><span>지역</span><span>기초금액</span><span>투찰마감</span><span></span></div>
       {result.length===0?<div className="empty">조건에 맞는 공고가 없습니다. 검색 조건을 변경해보세요.</div>:visibleItems.map(b=><article className="data-row" key={b.id}>
-        <span className={`cat ${b.category}`}>{b.category}</span><a className="bid-title" href={`/bids/${b.id}`}><strong>{b.title}</strong><small>{b.number}</small></a><span>{b.agency}</span><span>{b.region}</span><span className="money">{won(b.basePrice)}</span><span className="due">{b.status==="마감임박"&&<strong>마감임박</strong>}{b.deadline.slice(5)}</span><button className={`fav ${saved.includes(b.id)?"saved":""}`} onClick={()=>setSaved(v=>v.includes(b.id)?v.filter(id=>id!==b.id):[...v,b.id])} aria-label="관심공고 저장">{saved.includes(b.id)?"★":"☆"}</button>
+        <span className={`cat ${b.category}`}>{b.category}</span><a className="bid-title" href={`/bids/${b.id}`}><span className="bid-title-line"><strong>{b.title}</strong>{hasRegionRestriction(b.region)&&<span className="region-restriction-badge" title={`지역제한: ${b.region}`}>지역제한</span>}</span><small>{b.number}</small></a><span>{b.agency}</span><span>{b.region}</span><span className="money">{won(b.basePrice)}</span><span className="due">{b.status==="마감임박"&&<strong>마감임박</strong>}{b.deadline.slice(5)}</span><button className={`fav ${saved.includes(b.id)?"saved":""}`} onClick={()=>setSaved(v=>v.includes(b.id)?v.filter(id=>id!==b.id):[...v,b.id])} aria-label="관심공고 저장">{saved.includes(b.id)?"★":"☆"}</button>
       </article>)}
     </section>
     {result.length>pageSize&&<nav className="pagination" aria-label="입찰공고 페이지">
